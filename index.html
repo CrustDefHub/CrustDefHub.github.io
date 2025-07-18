@@ -11,6 +11,14 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
   <!-- 自定义样式 -->
   <link rel="stylesheet" href="style.css" />
+  <!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){ dataLayer.push(arguments); }
+	  gtag('js', new Date());
+	  gtag('config', 'G-XXXXXXXXXX');
+	</script>
 </head>
 <body>
   <!-- 地图容器 -->
@@ -74,5 +82,7 @@
   <script src="main_obf.js"></script>
 
 </body>
+
+
 
 </html>
