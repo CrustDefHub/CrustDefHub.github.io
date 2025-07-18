@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CrustDefHub</title>
+  
+  <!-- Leaflet 核心样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Draw 插件样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <!-- 自定义样式 -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 地图容器 -->
+  <div id="map"></div>
+  
+  <!-- 信息控制面板 -->
+  <div class="info-box-bottom" id="info-box">
+  	<button class="toggle-btn" onclick="togglePanel('info-box-content')">📂 显示/隐藏控制面板</button>
+  	<div id="info-box-content">
+	    <label for="baseMapSelect">🗺️底图选择：</label>
+	    <select id="baseMapSelect">
+	      <option value="arcgis">地形图</option>
+	      <option value="osm">行政图</option>
+	    </select>
+	
+	    <label>📍 图层显示：</label>
+	    <label><input type="checkbox" id="toggleArrows" checked /> GNSS 水平速度场 (Hao et al.,2019)</label>
+	    <label for="zoomFactorInput">🔍 矢量缩放基准：</label>
+	    <input type="range" id="zoomFactorInput" min="5" max="15" value="9" />
+	    <span id="zoomFactorDisplay" style="display: none;">9</span>
+	    <label><input type="checkbox" id="toggleFaults" checked /> 活动断裂分布 (Xu et al. 2003)</label>
+	    <label><input type="checkbox" id="toggleEarthquake" checked /> 历史地震分布</label>
+	    <label>最小震级: <input type="number" id="minMagnitude" value="5" step="0.5" min="0.5" max="8.5" /></label>
+	    <label>🖍 块体边界活动速率(红色为正；蓝色为负)：</label>
+	    <label><input type="checkbox" id="toggleImportedSSLines" /> 导入走滑速率</label>
+	    <label><input type="checkbox" id="toggleImportedDSLines" /> 导入汇聚速率</label>
+	
+	    <label>🖍 GNSS应变率场：</label>
+	    <label><input type="checkbox" id="toggleImportedDaliDrawn" /> 导入面膨胀率</label>
+	    <label>最大面膨胀率: <input type="number" id="maxStrainInput" value="4.6" step="0.1" min="0.1" max="100" /></label>
+	    
+	    <div id="info-text">📌 绘制多边形或线段后可导出相关数据</div>
+	    <button id="downloadBtn" disabled>📥计算并导出</button>
+
+	    <label>🏢 中国地震局第二监测中心-大地测量数据团队</label>
+	    <label>👨‍💻宋尚武 ✉️ shangw.song@hotmail.com</label>
+  	</div>
+	</div>
+  
+	<style>
+	  #plot-container-content {
+	    display: none; /* 默认收起 */
+	  }
+	</style>
+	<div class="plot-container" id="plot-container">
+	  <button class="toggle-btn" onclick="togglePanel('plot-container-content')">剖面结果</button>
+	  <div id="plot-container-content">
+	    <div id="parallelPlot" style="width: 600px; height: 300px;"></div>
+			<div id="verticalPlot" style="width: 600px; height: 300px;"></div>
+	  </div>
+	</div>
+
+  <!-- 引入 Leaflet 核心 JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  	<!-- 引入 Plotly -->
+	<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+
+  <!-- 引入 Leaflet Draw 插件 JavaScript -->
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <!-- 引入自定义 JavaScript -->
+  <script src="main_obf.js"></script>
+
+</body>
+
+</html>
