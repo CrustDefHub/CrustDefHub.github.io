@@ -57,6 +57,39 @@ html, body, #map {
   left: -50px;
   position: relative; /* 默认定位 */
 }
+
+#export-panel {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-size: 14px;
+  z-index: 999;
+}
+
+#export-panel button {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+#contact-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  z-index: 999;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
 /* 控件样式统一优化 */
 label {
   display: block;
