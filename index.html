@@ -26,7 +26,7 @@
   
   <!-- 信息控制面板 -->
   <div class="info-box-bottom" id="info-box">
-  	<button class="toggle-btn" onclick="togglePanel('info-box-content')">📂 显示/隐藏控制面板</button>
+  	<button class="toggle-btn" onclick="togglePanel('info-box-content')">📂 显示/隐藏图层面板</button>
   	<div id="info-box-content">
 	    <label for="baseMapSelect">🗺️底图选择：</label>
 	    <select id="baseMapSelect">
@@ -49,22 +49,38 @@
 	    <label>🖍 GNSS应变率场：</label>
 	    <label><input type="checkbox" id="toggleImportedDaliDrawn" /> 导入面膨胀率</label>
 	    <label>最大面膨胀率: <input type="number" id="maxStrainInput" value="4.6" step="0.1" min="0.1" max="100" /></label>
-	    
-	    <div id="info-text">📌 绘制多边形或线段后可导出相关数据</div>
-	    <button id="downloadBtn" disabled>📥计算并导出</button>
+  	</div>
+  	<!-- 左下角导出提示与按钮 -->
+		
+	</div>
 
+	<!-- 左下角导出面板，带有显示/隐藏功能 -->
+	<div id="export-panel">
+	  <button class="toggle-btn" onclick="togglePanel('export-panel-content')">📂 显示/隐藏交互面板</button>
+	  <div id="export-panel-content">
+	    <div id="info-text">📌 绘制剖面范围和断层位置后可导出剖面数据并画图</div>
+	    <button id="projectBtn" disabled>📥绘制剖面并导出</button>
+	    <div id="info-text">📌 绘制多边形范围并导出范围内速度矢量</div>
+	    <button id="exportPolyBtn" disabled>📤 导出多边形内GPS数据</button>
+	  </div>
+	</div>
+
+	
+	<!-- 右上角信息 -->
+	<div id="contact-info">
+	  <button class="toggle-btn" onclick="togglePanel('contact-info-content')">📂 显示/隐藏联系信息面板</button>
+	  <div id="contact-info-content">
 	    <label>🏢 中国地震局第二监测中心-大地测量数据团队</label>
 	    <label>👨‍💻宋尚武 ✉️ shangw.song@hotmail.com</label>
-  	</div>
+	  </div>
 	</div>
-  
 	<style>
 	  #plot-container-content {
 	    display: none; /* 默认收起 */
 	  }
 	</style>
 	<div class="plot-container" id="plot-container">
-	  <button class="toggle-btn" onclick="togglePanel('plot-container-content')">剖面结果</button>
+	  <button class="toggle-btn" onclick="togglePanel('plot-container-content')">📂显示/隐藏剖面结果</button>
 	  <div id="plot-container-content">
 	    <div id="parallelPlot" style="width: 600px; height: 300px;"></div>
 			<div id="verticalPlot" style="width: 600px; height: 300px;"></div>
