@@ -26,7 +26,7 @@
   
   <!-- 信息控制面板 -->
   <div class="info-box-bottom" id="info-box">
-  	<button class="toggle-btn" onclick="togglePanel('info-box-content')">📂 显示/隐藏图层面板</button>
+  	<button class="toggle-btn" onclick="togglePanel('info-box-content')">图层面板✅/❌</button>
   	<div id="info-box-content">
 	    <label for="baseMapSelect">🗺️底图选择：</label>
 	    <select id="baseMapSelect">
@@ -56,7 +56,7 @@
 
 	<!-- 左下角导出面板，带有显示/隐藏功能 -->
 	<div id="export-panel">
-	  <button class="toggle-btn" onclick="togglePanel('export-panel-content')">📂 显示/隐藏交互面板</button>
+	  <button class="toggle-btn" onclick="togglePanel('export-panel-content')">交互面板✅/❌</button>
 	  <div id="export-panel-content">
 	    <div id="info-text">📌 绘制剖面范围和断层位置后可导出剖面数据并画图</div>
 	    <button id="projectBtn" disabled>📥绘制剖面并导出</button>
@@ -68,11 +68,14 @@
 	
 	<!-- 右上角信息 -->
 	<div id="contact-info">
-	  <button class="toggle-btn" onclick="togglePanel('contact-info-content')">📂 显示/隐藏联系信息面板</button>
+	  <button class="toggle-btn" onclick="togglePanel('contact-info-content')">联系信息✅/❌</button>
 	  <div id="contact-info-content">
 	    <label>🏢 中国地震局第二监测中心-大地测量数据团队</label>
 	    <label>👨‍💻宋尚武 ✉️ shangw.song@hotmail.com</label>
 	  </div>
+	  <a href="https://hitcounter.pythonanywhere.com" target="_blank">
+  		<img src="https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://crustdefhub.github.io" />
+		</a>
 	</div>
 	<style>
 	  #plot-container-content {
@@ -80,7 +83,7 @@
 	  }
 	</style>
 	<div class="plot-container" id="plot-container">
-	  <button class="toggle-btn" onclick="togglePanel('plot-container-content')">📂显示/隐藏剖面结果</button>
+	  <button class="toggle-btn" onclick="togglePanel('plot-container-content')">剖面结果✅/❌</button>
 	  <div id="plot-container-content">
 	    <div id="parallelPlot" style="width: 600px; height: 300px;"></div>
 			<div id="verticalPlot" style="width: 600px; height: 300px;"></div>
