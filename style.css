@@ -4,6 +4,34 @@ html, body, #map {
   margin: 0;
   padding: 0;
 }
+
+/* 提示文本样式 */
+.info-text {
+  font-size: 12px; /* 提示文本字体大小 */
+  line-height: 1.5; /* 行距优化 */
+  margin-bottom: 8px; /* 与按钮间距 */
+  border: 1px solid #ccc; /* 添加窄边框，1px 宽度 */
+  padding: 5px 8px; /* 内边距，确保文本不紧贴边框 */
+}
+
+/* 按钮样式 */
+#projectBtn, #exportPolyBtn {
+  font-size: 12px; /* 按钮字体稍小于提示文本 */
+ padding: 2px 12px; /* 内边距优化 */
+  background-color: #f0f0f0; /* 浅灰色背景 */
+  border: 1px solid #ccc; /* 边框 */
+}
+
+#projectBtn:hover:not(:disabled), #exportPolyBtn:hover:not(:disabled) {
+  background-color: #e0e0e0; /* 悬停时背景变暗 */
+}
+
+#projectBtn:disabled, #exportPolyBtn:disabled {
+  opacity: 0.6; /* 禁用状态透明度 */
+  cursor: not-allowed; /* 禁用状态指针 */
+}
+
+/* 底部右侧信息框 */
 .info-box-bottom {
   position: absolute;
   bottom: 10px;
@@ -11,7 +39,7 @@ html, body, #map {
   background-color: rgba(255, 255, 255, 0.95);
   padding: 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px; /* 增大字体大小，与按钮协调 */
   z-index: 1001;
   max-width: 300px;
   overflow-y: auto;
@@ -19,6 +47,7 @@ html, body, #map {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
+/* 底部左侧信息框 */
 .info-box-left-bottom {
   position: absolute;
   bottom: 10px;
@@ -26,65 +55,69 @@ html, body, #map {
   background-color: rgba(255, 255, 255, 0.95);
   padding: 10px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px; /* 增大字体大小 */
   z-index: 1001;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
+/* 绘图容器 */
 .plot-container {
   position: absolute;
-  top: 8px;     /* 距离顶部 10px */
-  left: 50px;   /* 距离右侧 10px */
+  top: 8px;
+  left: 50px;
   background-color: rgba(255, 255, 255, 0.95);
   padding: 10px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px; /* 增大字体大小 */
   z-index: 1001;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  max-width: 1000px;  
+  max-width: 1000px;
   overflow: auto;
 }
 
-
+/* Plotly 图表 */
 #parallelPlot,
 #verticalPlot {
-  width: 100%;  
+  width: 100%;
   height: 300px;
   left: -50px;
-  position: relative; 
+  position: relative;
 }
 
+/* 导出面板 */
 #export-panel {
   position: absolute;
   bottom: 10px;
   left: 10px;
   background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid #ccc;
+  border: 1px solid #ccc; /* 保持窄边框 */
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  font-size: 12px; /* 增大字体大小 */
   z-index: 999;
 }
 
-
+/* 联系信息 */
 #contact-info {
   position: absolute;
   top: 10px;
   right: 10px;
   background-color: rgba(255, 255, 255, 0.95);
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #ccc; /* 保持窄边框 */
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px; /* 增大字体大小 */
   line-height: 1.4;
   z-index: 999;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* 表单控件 */
 label {
   display: block;
   margin: 4px 0;
+  font-size: 12px; /* 增大标签字体大小 */
 }
 
 input[type="checkbox"],
@@ -93,4 +126,5 @@ input[type="number"],
 select {
   margin-left: 5px;
   margin-right: 10px;
+  font-size: 12px; /* 增大输入框字体大小 */
 }
