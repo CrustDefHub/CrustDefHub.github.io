@@ -33,10 +33,10 @@
 	      <option value="arcgis">地形图</option>
 	    </select>
 	
-	    <label>🗺GNSS速度场：</label>
+	    <label>🗺️GNSS速度场：</label>
 	    <label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_0" value="./data/velocity1.json" checked> Hao et al., 2019, Sci. Rep.</label>
 			<label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_1" value="./data/velocity2.json" > Wang & Shen, 2020, GJR</label>
-			<label><input type="checkbox" id="toggleStationLabels" > 站点名称<label>
+			<label><input type="checkbox" id="toggleStationLabels" > 显示站点名称<label>
 			<label for="zoomFactorInput">🔍 矢量缩放基准：</label>
 	    <input type="range" id="zoomFactorInput" min="5" max="15" value="9" />
 	    <span id="zoomFactorDisplay" style="display: none;">9</span>
@@ -59,7 +59,7 @@
 	    <div id="info-text">📌 绘制剖面范围和断层位置</div>
 	    <button id="projectBtn" disabled>📥绘制剖面并导出</button>
 	    <div id="info-text">📌 框选导出多边形内速度矢量</div>
-	    <button id="exportPolyBtn" disabled>📤 导出多边形内GNSS数据</button>
+	    <button id="exportPolyBtn" disabled>📤 导出多边形内GPS数据</button>
 	  </div>
 	</div>
 
@@ -70,6 +70,8 @@
 	    <label>👥 大地测量数据团队</label>
 	    <label>👨‍💻 宋尚武</label>
 	    <label>✉️ shangw.song@hotmail.com</label>
+	    <label>💬 微信二维码</label>
+	    <img src="wechat_qr_code.jpg" alt="WeChat QR Code" width="180" height="180">
 	  </div>
 	</div>
 	<style>
