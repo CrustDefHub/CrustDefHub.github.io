@@ -9,6 +9,7 @@
 
   <link rel="stylesheet" href="lib/leaflet/leaflet.draw.css" />
 
+
   <link rel="stylesheet" href="style.css" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SL8FQGGL8"></script>
@@ -36,6 +37,7 @@
 	    <label>🗺️GNSS速度场：</label>
 	    <label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_0" value="./data/velocity1.json" checked> Hao et al., 2019, Sci. Rep.</label>
 			<label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_1" value="./data/velocity2.json" > Wang & Shen, 2020, GJR</label>
+			<label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_2" value="./data/velocity3.json" > 融合速度场</label>
 			<label><input type="checkbox" id="toggleStationLabels" > 显示站点名称<label>
 			<label for="zoomFactorInput">🔍 矢量缩放基准：</label>
 	    <input type="range" id="zoomFactorInput" min="5" max="15" value="9" />
@@ -56,9 +58,9 @@
 	<div id="export-panel">
 	  <button class="toggle-btn" onclick="togglePanel('export-panel-content')" style="font-size: 12px;;">速度剖面交互面板✅/❌</button>
 	  <div id="export-panel-content">
-	    <div id="info-text">📌 绘制剖面范围和断层位置</div>
+	    <div class="info-text">📌 绘制剖面范围和断层位置</div>
 	    <button id="projectBtn" disabled>📥绘制剖面并导出</button>
-	    <div id="info-text">📌 框选导出多边形内速度矢量</div>
+	    <div class="info-text">📌 框选导出多边形内速度矢量</div>
 	    <button id="exportPolyBtn" disabled>📤 导出多边形内GPS数据</button>
 	  </div>
 	</div>
@@ -68,8 +70,10 @@
 	  <div id="contact-info-content">
 	    <label>🏢 中国地震局第二监测中心</label>
 	    <label>👥 大地测量数据团队</label>
+	    <label>👨‍💻 宋尚武</label>
+	    <label>✉️ shangw.song@hotmail.com</label>
 	    <label>💬 微信二维码</label>
-	    <img src="wechat_qr_code.jpg" alt="WeChat QR Code" width="180" height="180">
+	    <img src="wechat_qr_code.jpg" alt="WeChat QR Code" style="display: block; margin-left: auto; margin-right: auto; width: 100px; height: 100px;">
 	  </div>
 	</div>
 	<style>
@@ -95,6 +99,3 @@
 
 
 </html>
-
-
-
