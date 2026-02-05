@@ -6,7 +6,35 @@ html, body, #map {
 }
 
 
+#lang-switch {
+  position: fixed;
+  top: 10px;        /* 距离顶部距离 */
+  left: 80px;       /* 距离左侧距离 */
+  z-index: 1000;    /* 确保在地图图层之上，但建议略低于某些控件 */
+  
+  /* 方块样式 */
+  width:120px;      /* 宽度 */
+  height: 34px;     /* 高度，保持宽高一致即为正方形 */
+  padding: 0;
+  
+  background: white;
+  border: 2px solid rgba(0,0,0,0.2); /* 模仿 Leaflet 按钮的边框风格 */
+  border-radius: 4px;
+  cursor: pointer;
+  
+  /* 文本微调 */
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
 
+#lang-switch:hover {
+  background-color: #f4f4f4;
+}
 
 #projectBtn, #exportPolyBtn {
   font-size: 12px; 
