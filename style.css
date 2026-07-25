@@ -1,166 +1,24 @@
-
-html, body, #map {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-
-#lang-switch {
-  position: fixed;
-  top: 10px;        /* 距离顶部距离 */
-  left: 80px;       /* 距离左侧距离 */
-  z-index: 1000;    /* 确保在地图图层之上，但建议略低于某些控件 */
-  
-  /* 方块样式 */
-  width:120px;      /* 宽度 */
-  height: 34px;     /* 高度，保持宽高一致即为正方形 */
-  padding: 0;
-  
-  background: white;
-  border: 2px solid rgba(0,0,0,0.2); /* 模仿 Leaflet 按钮的边框风格 */
-  border-radius: 4px;
-  cursor: pointer;
-  
-  /* 文本微调 */
-  font-size: 12px;
-  font-weight: bold;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-}
-
-#lang-switch:hover {
-  background-color: #f4f4f4;
-}
-
-#projectBtn, #exportPolyBtn {
-  font-size: 12px; 
-  padding: 2px 12px; 
-  background-color: #f0f0f0; 
-  border: 1px solid #ccc; 
-}
-
-#projectBtn:hover:not(:disabled), #exportPolyBtn:hover:not(:disabled) {
-  background-color: #e0e0e0; 
-}
-
-#projectBtn:disabled, #exportPolyBtn:disabled {
-  opacity: 0.6; 
-  cursor: not-allowed; 
-}
-
-.info-box-bottom {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 12px; 
-  z-index: 1001;
-  max-width: 300px;
-  overflow-y: auto;
-  max-height: 90vh;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-
-.info-box-left-bottom {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 12px; 
-  z-index: 1001;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.plot-container {
-  position: absolute;
-  bottom: 10px;
-  left: 200px;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 12px; 
-  z-index: 1001;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  max-width: 1000px;
-  overflow: visible;
-}
-#parallelPlot,
-#verticalPlot {
-  width: 100%;
-  height: 280px;
-  left: -200px;
-  bottom: -15px;
-  margin: 0;
-  padding: 0; 
-  position: relative;
-}
-.toggle-btn {
-  margin: 0; 
-  padding: 5px 10px; 
-  font-size: 12px; 
-  display: block;  
-  position: relative; 
-  z-index: 1002; 
-  background-color: #f0f0f0; 
-  border: 1px solid #ccc; 
-  border-radius: 4px;
-}
-#export-panel {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid #ccc; 
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  font-size: 12px; 
-  z-index: 999;
-}
-
-#export-panel .info-text {
-  font-size: 12px; 
-  line-height: 1.5; /
-  margin-bottom: 18px; 
-  border: 0px solid #ccc; 
-  padding: 5px 2px; 
-}
-/* 联系信息 */
-#contact-info {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 8px 12px;
-  border: 1px solid #ccc; 
-  border-radius: 8px;
-  font-size: 12px; 
-  line-height: 1.4;
-  z-index: 999;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* 表单控件 */
-label {
-  display: block;
-  margin: 4px 0;
-  font-size: 12px; 
-}
-
-input[type="checkbox"],
-input[type="range"],
-input[type="number"],
-select {
-  margin-left: 5px;
-  margin-right: 10px;
-  font-size: 12px; 
-}
+:root { --ink:#10243a; --muted:#64748b; --line:#dbe5ef; --surface:rgba(255,255,255,.94); --accent:#0f766e; --accent-dark:#0b5e58; }
+* { box-sizing:border-box; }
+html, body, #map { width:100%; height:100%; margin:0; }
+body { color:var(--ink); font:13px/1.45 "Microsoft YaHei", "Segoe UI", sans-serif; background:#e8eef3; }
+button, input, select { font:inherit; }
+.app-brand { position:fixed; z-index:1001; top:16px; left:58px; display:flex; align-items:center; gap:9px; color:#fff; text-shadow:0 1px 3px rgba(4,20,35,.7); pointer-events:none; }
+.brand-mark { display:grid; place-items:center; width:31px; height:31px; border:1px solid rgba(255,255,255,.65); border-radius:9px; background:rgba(9,42,62,.78); font-weight:800; letter-spacing:-.5px; }
+.app-brand strong { display:block; font-size:16px; letter-spacing:.2px; }.app-brand small { display:block; opacity:.85; font-size:10px; letter-spacing:.8px; }
+.map-panel { position:absolute; z-index:1000; background:var(--surface); border:1px solid rgba(219,229,239,.95); border-radius:12px; box-shadow:0 12px 30px rgba(15,35,57,.16); backdrop-filter:blur(10px); overflow:hidden; }
+.layer-panel { top:16px; right:16px; width:min(330px, calc(100vw - 32px)); max-height:calc(100vh - 32px); overflow:auto; }
+.tool-panel { bottom:16px; left:16px; width:265px; }.contact-panel { top:16px; right:362px; width:210px; }.plot-container { bottom:16px; left:298px; width:min(700px, calc(100vw - 330px)); max-height:calc(100vh - 32px); overflow:auto; }
+.panel-heading { min-height:53px; padding:10px 13px 9px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); background:linear-gradient(115deg, rgba(248,251,253,.98), rgba(238,247,246,.95)); }
+.panel-heading h1, .panel-heading h2 { margin:1px 0 0; font-size:14px; line-height:1.15; }.eyebrow { display:block; color:var(--accent); font-size:9px; font-weight:800; letter-spacing:1.15px; }
+.panel-toggle { width:27px; height:27px; border:1px solid #cbd9e5; border-radius:7px; background:white; color:var(--accent); cursor:pointer; font-size:17px; line-height:18px; }.panel-toggle:hover { background:#e6f4f2; }
+.panel-content { padding:12px 16px 15px; }.panel-content section + section { margin-top:13px; padding-top:13px; border-top:1px solid var(--line); }.panel-content h2 { margin:0 0 8px; font-size:11px; color:#49637d; letter-spacing:.4px; text-transform:uppercase; }
+.field-label { display:block; margin:8px 0 4px; font-weight:600; color:#42566d; }.field-label.compact { display:inline-block; margin:7px 6px 7px 0; }
+.control-row { display:flex; align-items:flex-start; gap:8px; margin:7px 0; cursor:pointer; color:#263d55; }.control-row:hover span { color:var(--accent-dark); }.control-row input { margin:2px 0 0; accent-color:var(--accent); }
+select, input[type="number"] { min-height:30px; border:1px solid #cbd9e5; border-radius:6px; padding:4px 7px; color:var(--ink); background:#fff; } select { width:100%; } input[type="number"] { width:72px; } input[type="range"] { width:calc(100% - 34px); accent-color:var(--accent); vertical-align:middle; }.range-value { display:inline-block; width:27px; color:var(--accent); font-weight:700; text-align:right; }
+.layer-status { margin:5px 0 0 24px; color:var(--muted); font-size:11px; }.layer-status::before { content:"●"; margin-right:5px; color:var(--accent); }.layer-status.is-error { color:#b42318; }.layer-status.is-error::before { color:#b42318; }
+.tool-panel p, .contact-panel p { margin:0 0 11px; color:#536a80; font-size:12px; }.contact-panel a { color:var(--accent); text-decoration:none; }.button-stack { display:grid; gap:7px; }.button-stack button { min-height:32px; border:0; border-radius:7px; background:var(--accent); color:#fff; cursor:pointer; font-weight:600; }.button-stack button:hover:not(:disabled) { background:var(--accent-dark); }.button-stack button:disabled { cursor:not-allowed; opacity:.44; }
+#parallelPlot, #verticalPlot { width:100%; height:270px; }.beachball-popup { min-width:200px; line-height:1.6; }
+#plot-container-content { display:none; }
+.leaflet-control-zoom a { color:var(--ink) !important; }.leaflet-popup-content-wrapper { border-radius:10px; }.leaflet-popup-content { margin:12px 15px; }
+@media (max-width:850px) { .app-brand { left:54px; top:12px; }.contact-panel { display:none; }.layer-panel { top:10px; right:10px; width:290px; max-height:calc(100vh - 20px); }.tool-panel { bottom:10px; left:10px; width:240px; }.plot-container { left:10px; bottom:10px; width:calc(100vw - 20px); max-height:65vh; }.plot-container .panel-content { padding:8px; } }

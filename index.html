@@ -1,146 +1,85 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b2239">
   <title>CrustDefHub</title>
-  
-  <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="lib/leaflet/leaflet.draw.css" />
-  <link rel="stylesheet" href="style.css" />
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SL8FQGGL8"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-5SL8FQGGL8');
-  </script>
-
-  <style>
-    /* 语言切换按钮样式 */
-    #lang-switch {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
-      padding: 5px 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    #plot-container-content {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+  <link rel="stylesheet" href="lib/leaflet/leaflet.draw.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <button id="lang-switch" onclick="toggleLanguage()">English / 中文</button>
+  <div id="map" aria-label="地壳形变交互地图"></div>
 
-  <div id="map"></div>
-  
-  <div class="info-box-bottom" id="info-box">
-    <button class="toggle-btn" onclick="togglePanel('info-box-content')" style="font-size: 12px;" data-zh="图层管理✅/❌" data-en="Layer Management✅/❌">图层管理✅/❌</button>
-    <div id="info-box-content">
-      <label for="baseMapSelect" data-zh="🗺️地理底图：" data-en="🗺️Base Map:">🗺️地理底图：</label>
-      <select id="baseMapSelect">
-        <option value="arcgis" data-zh="地形图" data-en="Terrain">地形图</option>
-		<option value="osm" data-zh="行政图" data-en="Administrative">行政图</option>
-      </select>
+  <header class="app-brand">
+    <span class="brand-mark">CD</span>
+    <div><strong>CrustDefHub</strong><small>地壳形变数据中心</small></div>
+  </header>
 
-      <label data-zh="🗺️GNSS速度场：" data-en="🗺️GNSS Velocity:">🗺️GNSS速度场：</label>
-      <label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_0" value="./data/velocity1.json" checked> Hao et al., 2019, Sci. Rep.</label>
-      <label><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_1" value="./data/velocity2.json" > Wang & Shen, 2020, GJR</label>
-      <label>
-	  <input type="checkbox" class="velocityCheckbox" id="toggleVelocity_2" value="./data/velocity3.json" data-zh="融合速度场" data-en="Merged Velocity">
-	  <span data-zh="融合速度场" data-en="Merged Velocity">融合速度场</span>
-	</label>
-      <label><input type="checkbox" id="toggleStationLabels" ><span data-zh=" 显示站点名称" data-en=" Show Station Names"> 显示站点名称</span></label>
-      
-      <label for="zoomFactorInput" data-zh="🔍 矢量缩放基准：" data-en="🔍 Vector Scaling:">🔍 矢量缩放基准：</label>
-      <input type="range" id="zoomFactorInput" min="5" max="15" value="9" />
-      <span id="zoomFactorDisplay" style="display: none;">9</span>
-
-      <label><input type="checkbox" id="toggleFaults" checked /> <span data-zh="活动断裂 (Wu et al., 2024)" data-en="Active Faults (Wu et al., 2024)">活动断裂 (Wu et al., 2024)</span></label>
-      <label><input type="checkbox" id="toggleEarthquake"  /> <span data-zh="历史地震分布" data-en="Seismicity">历史地震分布</span></label>
-      <label><input type="checkbox" id="toggleBeachball" > <span data-zh="震源球(ISC&GCMT)" data-en="Focal Mechanism(ISC&GCMT)">震源球(ISC&GCMT)</span></label>
-      
-      <label><span data-zh="最小震级: " data-en="Min Magnitude: ">最小震级: </span><input type="number" id="minMagnitude" value="5" step="0.5" min="0.5" max="8.5" /></label>
-      
-      <label data-zh="🖍 块体边界活动速率(红正蓝负)：" data-en="🖍 Fault Slip Rate (Red+, Blue-):">🖍 块体边界活动速率(红正蓝负)：</label>
-      <label><input type="checkbox" id="toggleImportedSSLines" /> <span data-zh="走滑速率" data-en="Strike-slip">走滑速率</span></label>
-      <label><input type="checkbox" id="toggleImportedDSLines" /> <span data-zh="汇聚速率" data-en="Shortening/Extension">汇聚速率</span></label>
-
-      <label data-zh="🖍 GNSS应变率场：" data-en="🖍 GNSS Strain Rate:">🖍 GNSS应变率场：</label>
-      <label><input type="checkbox" id="toggleImportedDaliDrawn" /> <span data-zh="面膨胀率" data-en="Dilatation Rate">面膨胀率</span></label>
-      <label><span data-zh="最大面膨胀率: " data-en="Max Dilatation: ">最大面膨胀率: </span><input type="number" id="maxStrainInput" value="4.6" step="0.1" min="0.1" max="100" /></label>
+  <aside class="map-panel layer-panel">
+    <div class="panel-heading">
+      <div><span class="eyebrow">DATA LAYERS</span><h1>图层管理</h1></div>
+      <button class="panel-toggle" type="button" onclick="togglePanel('info-box-content')" aria-label="展开或收起图层管理">⌃</button>
     </div>
-  </div>
-
-  <div id="export-panel">
-    <button class="toggle-btn" onclick="togglePanel('export-panel-content')" style="font-size: 12px;" data-zh="速度剖面交互面板✅/❌" data-en="Velocity Profile Panel✅/❌">速度剖面交互面板✅/❌</button>
-    <div id="export-panel-content">
-      <div class="info-text" data-zh="📌 绘制剖面范围和断层位置" data-en="📌 Draw profile ">📌 绘制剖面</div>
-      <button id="projectBtn" disabled data-zh="📥绘制剖面并导出" data-en="📥Plot & Export Profile">📥绘制剖面并导出</button>
-      <div class="info-text" data-zh="📌 框选导出多边形内速度矢量" data-en="📌 Select poly to export GPS">📌 框选导出多边形内速度矢量</div>
-      <button id="exportPolyBtn" disabled data-zh="📤 导出多边形内GPS数据" data-en="📤 Export GPS  in Polygon">📤 导出多边形内GPS数据</button>
+    <div id="info-box-content" class="panel-content">
+      <section>
+        <h2>底图</h2>
+        <label class="field-label" for="baseMapSelect">地图样式</label>
+        <select id="baseMapSelect"><option value="arcgis">地形晕渲图</option><option value="osm">行政道路图</option></select>
+      </section>
+      <section>
+        <h2>GNSS 速度场</h2>
+        <label class="control-row"><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_0" value="./data/velocity1.json" checked><span>Hao et al., 2019, Sci. Rep.</span></label>
+        <label class="control-row"><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_1" value="./data/velocity2.json"><span>Wang &amp; Shen, 2020, GJR</span></label>
+        <label class="control-row"><input type="checkbox" class="velocityCheckbox" id="toggleVelocity_2" value="./data/velocity3.json"><span>融合速度场</span></label>
+        <label class="control-row"><input type="checkbox" id="toggleStationLabels"><span>显示站点名称</span></label>
+        <label class="field-label" for="zoomFactorInput">矢量缩放</label>
+        <input type="range" id="zoomFactorInput" min="5" max="15" value="9">
+        <span id="zoomFactorDisplay" class="range-value">9</span>
+      </section>
+      <section>
+        <h2>构造与地震</h2>
+        <label class="control-row"><input type="checkbox" id="toggleFaults" checked><span>活动断裂（Wu et al., 2024）</span></label>
+        <label class="control-row"><input type="checkbox" id="toggleEarthquake"><span>历史地震分布</span></label>
+        <label class="field-label compact" for="minMagnitude">最小震级</label>
+        <input type="number" id="minMagnitude" value="5" step="0.5" min="0.5" max="8.5">
+        <label class="control-row beachball-row"><input type="checkbox" id="toggleBeachball"><span>震源机制解（ISC &amp; GCMT）</span></label>
+        <p id="beachballStatus" class="layer-status" aria-live="polite">未显示</p>
+      </section>
+      <section>
+        <h2>形变速率</h2>
+        <label class="control-row"><input type="checkbox" id="toggleImportedSSLines"><span>走滑速率</span></label>
+        <label class="control-row"><input type="checkbox" id="toggleImportedDSLines"><span>汇聚 / 拉张速率</span></label>
+        <label class="control-row"><input type="checkbox" id="toggleImportedDaliDrawn"><span>面膨胀率</span></label>
+        <label class="field-label compact" for="maxStrainInput">最大面膨胀率</label>
+        <input type="number" id="maxStrainInput" value="4.6" step="0.1" min="0.1" max="100">
+      </section>
     </div>
-  </div>
+  </aside>
 
-  <div id="contact-info">
-    <button class="toggle-btn" onclick="togglePanel('contact-info-content')" style="font-size: 12px;" data-zh="联系信息✅/❌" data-en="Contact Info✅/❌">联系信息✅/❌</button>
-    <div id="contact-info-content">
-      <label data-zh="🏢 中国地震局第二监测中心" data-en="🏢 SMAC, CEA">🏢 中国地震局第二监测中心</label>
-      <label data-zh="👥 大地测量数据团队" data-en="👥 Geodesy Data Team">👥 大地测量数据团队</label>
-      <label data-zh="👨‍💻 宋尚武" data-en="👨‍💻 Shangwu Song">👨‍💻 宋尚武</label>
-      <label>✉️ shangw.song@hotmail.com</label>
-      <label data-zh="💬 微信二维码" data-en="💬 WeChat QR Code">💬 微信二维码</label>
-      <img src="wechat_qr_code.jpg" alt="WeChat QR Code" style="display: block; margin-left: auto; margin-right: auto; width: 100px; height: 100px;">
+  <section id="export-panel" class="map-panel tool-panel">
+    <div class="panel-heading"><div><span class="eyebrow">ANALYSIS</span><h2>剖面与导出</h2></div><button class="panel-toggle" type="button" onclick="togglePanel('export-panel-content')">⌃</button></div>
+    <div id="export-panel-content" class="panel-content">
+      <p>在地图上绘制剖面线或多边形后，可生成分析结果与导出数据。</p>
+      <div class="button-stack"><button id="projectBtn" disabled>绘制并导出剖面</button><button id="exportPolyBtn" disabled>导出多边形内 GNSS 数据</button></div>
     </div>
-  </div>
+  </section>
 
-  <div class="plot-container" id="plot-container">
-    <button class="toggle-btn" onclick="togglePanel('plot-container-content')" style="font-size: 12px;" data-zh="查看剖面结果✅/❌" data-en="View Profile Results✅/❌">查看剖面结果✅/❌</button>
-    <div id="plot-container-content">
-      <div id="parallelPlot" style="width: 600px; height: 300px;"></div>
-      <div id="verticalPlot" style="width: 600px; height: 300px;"></div>
-    </div>
-  </div>
+  <section id="contact-info" class="map-panel contact-panel">
+    <div class="panel-heading"><div><span class="eyebrow">ABOUT</span><h2>数据团队</h2></div><button class="panel-toggle" type="button" onclick="togglePanel('contact-info-content')">⌃</button></div>
+    <div id="contact-info-content" class="panel-content"><p>中国地震局第二监测中心<br>大地测量数据团队<br><a href="mailto:shangw.song@hotmail.com">shangw.song@hotmail.com</a></p></div>
+  </section>
+
+  <section class="plot-container map-panel" id="plot-container">
+    <div class="panel-heading"><div><span class="eyebrow">RESULTS</span><h2>剖面结果</h2></div><button class="panel-toggle" type="button" onclick="togglePanel('plot-container-content')">⌃</button></div>
+    <div id="plot-container-content" class="panel-content" style="display:none"><div id="parallelPlot"></div><div id="verticalPlot"></div></div>
+  </section>
 
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="lib/plotly/plotly.min.js"></script>
   <script src="lib/leaflet/leaflet.draw.js"></script>
   <script src="mainobf.js"></script>
-
-  <script>
-    let currentLang = 'zh';
-
-    function toggleLanguage() {
-      currentLang = (currentLang === 'zh') ? 'en' : 'zh';
-      const elements = document.querySelectorAll('[data-zh]');
-      
-      elements.forEach(el => {
-        // 如果元素有对应的语言数据，则切换
-        if (el.dataset[currentLang]) {
-          // 如果是文本节点，直接换文字；如果是带标签的，需要谨慎处理
-          if (el.children.length === 0 || el.tagName === 'OPTION' || el.tagName === 'BUTTON') {
-            el.innerText = el.dataset[currentLang];
-          } else {
-            // 处理包含 input 的 label 等复杂情况
-            const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "");
-            if (textNode) {
-                textNode.textContent = el.dataset[currentLang];
-            }
-          }
-        }
-      });
-      
-      // 切换 HTML lang 属性
-      document.documentElement.lang = currentLang;
-    }
-  </script>
+  <script src="beachball-performance.js"></script>
 </body>
 </html>
