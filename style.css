@@ -21,4 +21,10 @@ select, input[type="number"] { min-height:30px; border:1px solid #cbd9e5; border
 #parallelPlot, #verticalPlot { width:100%; height:270px; }.beachball-popup { min-width:200px; line-height:1.6; }
 #plot-container-content { display:none; }
 .leaflet-control-zoom a { color:var(--ink) !important; }.leaflet-popup-content-wrapper { border-radius:10px; }.leaflet-popup-content { margin:12px 15px; }
-@media (max-width:850px) { .app-brand { left:54px; top:12px; }.contact-panel { display:none; }.layer-panel { top:10px; right:10px; width:290px; max-height:calc(100vh - 20px); }.tool-panel { bottom:10px; left:10px; width:240px; }.plot-container { left:10px; bottom:10px; width:calc(100vw - 20px); max-height:65vh; }.plot-container .panel-content { padding:8px; } }
+@media (max-width:850px) {
+  .app-brand { left:54px; top:12px; }
+  .contact-panel { display:none; }
+  .layer-panel { top:10px; right:10px; width:290px; max-height:calc(100vh - 20px); }
+  /* 手机端只保留图层展示，隐藏剖面/导出等计算工具面板及绘图控件 */
+  .tool-panel, .plot-container, .leaflet-draw.leaflet-control { display:none !important; }
+}
