@@ -11,12 +11,18 @@
 </head>
 <body>
   <div id="map" aria-label="地壳形变交互地图"></div>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SL8FQGGL8"></script>
   <header class="app-brand">
     <span class="brand-mark">CD</span>
     <div><strong>CrustDefHub</strong><small>地壳形变</small></div>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SL8FQGGL8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-5SL8FQGGL8');
+    </script>
   </header>
-
+	
   <aside class="map-panel layer-panel">
     <div class="panel-heading">
       <div><span class="eyebrow">DATA LAYERS</span><h1>图层管理</h1></div>
