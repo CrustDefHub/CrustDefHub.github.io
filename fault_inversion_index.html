@@ -75,6 +75,7 @@
         .card.strike { border-left-color: #e67e22; }
         .card.dip { border-left-color: #9b59b6; }
         .card.external { border-left-color: #27ae60; }
+        .card.data { border-left-color: #3498db; }
         .card h2 {
             font-size: 1.2rem;
             font-weight: 600;
@@ -87,6 +88,7 @@
         .card.strike h2 i { color: #e67e22; }
         .card.dip h2 i { color: #9b59b6; }
         .card.external h2 i { color: #27ae60; }
+        .card.data h2 i { color: #3498db; }
         .card .desc {
             font-size: 0.9rem;
             color: #5a6c7d;
@@ -129,6 +131,8 @@
         .card.dip .btn-link:hover { background: #8e44ad; }
         .card.external .btn-link { background: #27ae60; }
         .card.external .btn-link:hover { background: #219a52; }
+        .card.data .btn-link { background: #3498db; }
+        .card.data .btn-link:hover { background: #2f89c5; }
         .footer {
             text-align: center;
             padding: 18px;
@@ -137,11 +141,60 @@
             background: white;
             border-top: 1px solid #e1e8f0;
         }
+
+        /* ===== 数据格式说明区 ===== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin: 6px 0 16px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #dfe7f0;
+            padding: 6px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .data-table th {
+            background: #f0f5fb;
+            color: #2c3e50;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .data-table td code {
+            background: #eef3f9;
+            color: #2c3e50;
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+        .sample-code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+        .data-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .data-actions .btn-link { cursor: pointer; border: none; }
+
         @media (max-width: 600px) {
             .header h1 { font-size: 1.4rem; }
             .main { padding: 24px 14px 36px; }
             .card { padding: 20px 18px; }
             .intro { padding: 20px 18px; }
+            .data-table { font-size: 0.76rem; }
+            .data-table th, .data-table td { padding: 5px 7px; }
         }
     </style>
 </head>
@@ -154,10 +207,49 @@
     <div class="main">
         <div class="intro">
             <p>本工作台基于弹性半空间位错模型，利用跨断层 GPS 速度剖面反演断层的运动学参数。通过非线性最小二乘拟合，可从平行与垂直断层方向的速度观测中分别提取走滑速率、倾滑速率、闭锁深度及断层倾角等关键信息。</p>
-            <p>下方提供两个独立的反演工具，以及一个相关的形变数据平台入口。</p>
+            <p>下方提供数据准备说明，以及两个独立的反演工具。</p>
         </div>
 
         <div class="card-grid">
+            <!-- 数据准备 -->
+            <div class="card data">
+                <h2><i class="fas fa-table"></i> 数据准备 · 跨断层速度剖面</h2>
+                <div class="desc">CSV 文件，每行一个观测点，列顺序固定如下</div>
+                <div class="principle">
+                    <strong>数据格式：</strong>文件为逗号分隔的 CSV（首行为列名，可省略；若省略则按下列顺序解析）。每一行代表一个跨断层观测点，包含距离、速度分量、误差、经纬度、开关与点名。
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>列序</th><th>字段名</th><th>单位</th><th>说明</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td><code>distance_km</code></td><td>km</td><td>点到断层的垂直距离（带符号，断层一侧为正、另一侧为负）</td></tr>
+                        <tr><td>2</td><td><code>v_par</code></td><td>mm/a</td><td>平行于断层方向的速度分量</td></tr>
+                        <tr><td>3</td><td><code>v_perp</code></td><td>mm/a</td><td>垂直于断层方向的速度分量</td></tr>
+                        <tr><td>4</td><td><code>sig_par</code></td><td>mm/a</td><td>平行分量误差（1σ）</td></tr>
+                        <tr><td>5</td><td><code>sig_perp</code></td><td>mm/a</td><td>垂直分量误差（1σ）</td></tr>
+                        <tr><td>6</td><td><code>lon</code></td><td>°</td><td>经度（如果没有可以设置为任意值）</td></tr>
+                        <tr><td>7</td><td><code>lat</code></td><td>°</td><td>纬度（如果没有可以设置为任意值）</td></tr>
+                        <tr><td>8</td><td><code>toggle</code></td><td>—</td><td>开关：<code>1</code> 参与计算，<code>0</code> 不参与计算</td></tr>
+                        <tr><td>9</td><td><code>name</code></td><td>—</td><td>站点名称（可含字母、数字、下划线）</td></tr>
+                    </tbody>
+                </table>
+                <div class="principle" style="margin-bottom:10px;">
+                    <strong>示例（前 5 行）：</strong>
+                </div>
+                <div class="sample-code">distance_km,v_par,v_perp,sig_par,sig_perp,lon,lat,toggle,name
+-32.5,4.82,-0.91,0.35,0.42,101.32,35.67,1,S001
+-18.2,4.15,-0.72,0.31,0.38,101.45,35.62,1,S002
+-8.6,3.44,-0.55,0.29,0.36,101.53,35.58,1,S003
+2.4,2.71,-0.38,0.28,0.35,101.62,35.54,1,S004
+14.7,1.86,-0.21,0.30,0.37,101.74,35.49,0,S005</div>
+                <div class="data-actions">
+                    <a class="btn-link" id="downloadSample" href="#" download="fault_profile_sample.csv">
+                        <i class="fas fa-download"></i> 下载示例数据（CSV）
+                    </a>
+                </div>
+            </div>
+
             <!-- 走滑 -->
             <div class="card strike">
                 <h2><i class="fas fa-arrows-left-right"></i> 走滑速率反演</h2>
@@ -198,5 +290,28 @@
 
     <!-- 引入 Font Awesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        // 动态生成示例数据文件，供“下载示例数据”按钮使用
+        (function () {
+            var header = "distance_km,v_par,v_perp,sig_par,sig_perp,lon,lat,toggle,name";
+            var rows = [
+                "-32.5,4.82,-0.91,0.35,0.42,101.32,35.67,1,S001",
+                "-18.2,4.15,-0.72,0.31,0.38,101.45,35.62,1,S002",
+                "-8.6,3.44,-0.55,0.29,0.36,101.53,35.58,1,S003",
+                "2.4,2.71,-0.38,0.28,0.35,101.62,35.54,1,S004",
+                "14.7,1.86,-0.21,0.30,0.37,101.74,35.49,0,S005",
+                "21.3,1.22,-0.14,0.32,0.39,101.82,35.45,1,S006",
+                "30.8,0.65,-0.08,0.34,0.41,101.95,35.40,1,S007"
+            ];
+            var csv = header + "\n" + rows.join("\n") + "\n";
+            var blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+            var url = URL.createObjectURL(blob);
+            var link = document.getElementById("downloadSample");
+            if (link) {
+                link.href = url;
+            }
+        })();
+    </script>
 </body>
 </html>
