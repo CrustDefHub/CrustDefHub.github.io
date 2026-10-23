@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>非线性求解 · 走滑速率拟合</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fmin@0.0.1/build/fmin.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #e8ecf1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background: #2c3e50; color: white; padding: 14px 28px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 100;
+        }
+        .header h1 { font-size: 1.4rem; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        .header h1 i { color: #3498db; }
+        .header .subtitle { font-size: 0.8rem; color: #a0b4c8; margin-left: 8px; }
+        .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .file-label {
+            background: #3498db; color: white; padding: 8px 16px; border-radius: 30px;
+            cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: background 0.2s;
+            display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); border: none;
+        }
+        .file-label:hover { background: #2980b9; }
+        .file-label input { display: none; }
+        .btn {
+            padding: 8px 20px; border-radius: 30px; border: none; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary { background: #27ae60; color: white; }
+        .btn-primary:hover { background: #219a52; }
+        .btn-primary:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.7; }
+        .btn-secondary { background: #ecf0f1; color: #2c3e50; }
+        .btn-secondary:hover { background: #dde4e6; }
+        .btn-sm { padding: 4px 12px; font-size: 0.75rem; border-radius: 20px; }
+        .solver-badge {
+            padding: 7px 14px; border-radius: 20px; border: 1px solid #b8d0f0;
+            background: #eaf4ff; font-size: 0.8rem; color: #2c3e50; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .solver-badge i { color: #27ae60; }
+
+        .main-container {
+            flex: 1; display: flex; padding: 16px; gap: 16px;
+            max-width: 1600px; margin: 0 auto; width: 100%; flex-wrap: wrap;
+        }
+        .left-panel { flex: 0 0 340px; display: flex; flex-direction: column; gap: 12px; }
+        .card {
+            background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 16px 18px; transition: box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .card-title {
+            font-size: 0.85rem; font-weight: 700; color: #2c3e50; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .card-title i { color: #3498db; font-size: 0.9rem; }
+        .data-stats { display: flex; flex-direction: column; gap: 8px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #34495e; }
+        .stat-row .stat-value { font-weight: 700; color: #2c3e50; font-family: 'Courier New', monospace; }
+
+        .param-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px solid #f0f4fa; font-size: 0.85rem;
+        }
+        .param-row:last-child { border-bottom: none; }
+        .param-label { color: #7f8c8d; font-weight: 500; }
+        .param-value { font-weight: 700; color: #2c3e50; font-family: 'Courier New', monospace; font-size: 0.85rem; }
+        .param-err { color: #e67e22; font-weight: 600; font-family: 'Courier New', monospace; font-size: 0.78rem; }
+        .param-unit { color: #95a5a6; font-size: 0.72rem; margin-left: 4px; }
+
+        .fit-stats { margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f4fa; }
+
+        .bounds-table { display: flex; flex-direction: column; gap: 6px; }
+        .bounds-header {
+            display: grid; grid-template-columns: 1fr 70px 70px; gap: 6px;
+            padding: 4px 0; font-size: 0.7rem; font-weight: 700; color: #7f8c8d;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e9eef4;
+        }
+        .bounds-header span:first-child { text-align: left; }
+        .bounds-header span { text-align: center; }
+        .bounds-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 6px; align-items: center; }
+        .bounds-row .param-name {
+            font-size: 0.8rem; color: #2c3e50; font-weight: 500;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .bounds-row .param-name .symbol {
+            font-family: 'Courier New', monospace; font-weight: 700;
+            color: #3498db; font-size: 0.85rem;
+        }
+        .bounds-row input[type="number"] {
+            width: 100%; padding: 5px 6px; border: 1px solid #d0dbe8; border-radius: 6px;
+            font-size: 0.78rem; font-family: 'Courier New', monospace; color: #2c3e50;
+            text-align: center; transition: border-color 0.15s, box-shadow 0.15s; background: #fafcff;
+        }
+        .bounds-row input[type="number"]:focus {
+            outline: none; border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15); background: white;
+        }
+        .bounds-row input[type="number"].invalid { border-color: #e74c3c; background: #fdf2f2; }
+        .bounds-actions {
+            display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid #e9eef4; flex-wrap: wrap;
+        }
+        .bounds-actions .btn { padding: 5px 12px; font-size: 0.72rem; border-radius: 16px; }
+        .preset-select {
+            padding: 5px 10px; border-radius: 16px; border: 1px solid #d0dbe8;
+            background: white; font-size: 0.72rem; color: #2c3e50; cursor: pointer;
+            outline: none; flex: 1; min-width: 120px;
+        }
+        .preset-select:focus { border-color: #3498db; }
+        .bounds-hint {
+            font-size: 0.7rem; color: #95a5a6; margin-top: 8px; line-height: 1.4;
+            display: flex; align-items: flex-start; gap: 4px;
+        }
+        .bounds-hint i { color: #f39c12; margin-top: 2px; }
+
+        .right-panel { flex: 1; min-width: 500px; display: flex; flex-direction: column; gap: 12px; }
+        .plot-card {
+            background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 12px; flex: 1; min-height: 500px; display: flex; flex-direction: column;
+        }
+        .plot-card .plot-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 8px 8px 8px; font-size: 0.8rem; color: #7f8c8d;
+        }
+        #plot { flex: 1; width: 100%; min-height: 450px; }
+
+        .log-area {
+            background: #1a1a2e; border-radius: 12px; padding: 12px 16px;
+            font-family: 'Courier New', monospace; font-size: 0.75rem; color: #a0e0a0;
+            max-height: 140px; overflow-y: auto; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            white-space: pre-wrap; word-break: break-all; line-height: 1.5;
+        }
+        .log-area .log-time { color: #6a9ec7; }
+        .log-area .log-err { color: #e74c3c; }
+        .log-area .log-ok { color: #2ecc71; }
+        .log-area .log-info { color: #f1c40f; }
+
+        .footer {
+            text-align: center; padding: 10px; font-size: 0.75rem; color: #95a5a6;
+            background: white; border-top: 1px solid #e1e8f0;
+        }
+        .empty-plot {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            color: #bdc3c7; font-size: 1rem; flex-direction: column; gap: 10px;
+        }
+        .empty-plot i { font-size: 3rem; }
+
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.7); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column; gap: 16px;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 48px; height: 48px; border: 5px solid #e1e8f0;
+            border-top: 5px solid #3498db; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; }
+            .left-panel { flex: 1; width: 100%; }
+            .right-panel { min-width: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <i class="fas fa-calculator"></i> 非线性求解 · 走滑速率拟合
+            <span class="subtitle">| 平行断层速率剖面</span>
+        </h1>
+        <div class="controls">
+            <div class="solver-badge"><i class="fas fa-check-circle"></i> Nelder-Mead 求解器</div>
+            <label class="file-label">
+                <i class="fas fa-folder-open"></i> 加载数据文件
+                <input type="file" id="fileInput" accept=".txt,.dat,.csv">
+            </label>
+            <button class="btn btn-primary" id="fitBtn" disabled>
+                <i class="fas fa-play"></i> 开始拟合
+            </button>
+            <button class="btn btn-secondary" id="resetBtn">
+                <i class="fas fa-undo"></i> 重置
+            </button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-database"></i> 数据概览</div>
+                <div class="data-stats" id="dataStats">
+                    <div class="stat-row"><span>数据点数</span><span class="stat-value" id="statTotal">0</span></div>
+                    <div class="stat-row"><span>有效点数 (toggle=1)</span><span class="stat-value" id="statValid" style="color:#e74c3c;">0</span></div>
+                    <div class="stat-row"><span>无效点数 (toggle=0)</span><span class="stat-value" id="statInvalid" style="color:#95a5a6;">0</span></div>
+                    <div class="stat-row"><span>距离范围</span><span class="stat-value" id="statRange">—</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-sliders-h"></i> 求解范围设置
+                </div>
+                <div class="bounds-table">
+                    <div class="bounds-header">
+                        <span>参数</span>
+                        <span>下界</span>
+                        <span>上界</span>
+                    </div>
+                    <div class="bounds-row">
+                        <span class="param-name"><span class="symbol">v</span> 走滑速率</span>
+                        <input type="number" id="boundVmin" value="-20" step="0.5" title="v 下界">
+                        <input type="number" id="boundVmax" value="20" step="0.5" title="v 上界">
+                    </div>
+                    <div class="bounds-row">
+                        <span class="param-name"><span class="symbol">d</span> 闭锁深度</span>
+                        <input type="number" id="boundDmin" value="0.5" step="0.5" title="d 下界">
+                        <input type="number" id="boundDmax" value="40" step="0.5" title="d 上界">
+                    </div>
+                    <div class="bounds-row">
+                        <span class="param-name"><span class="symbol">cy</span> 垂直平移</span>
+                        <input type="number" id="boundCymin" value="-30" step="0.5" title="cy 下界">
+                        <input type="number" id="boundCymax" value="30" step="0.5" title="cy 上界">
+                    </div>
+                    <div class="bounds-row">
+                        <span class="param-name"><span class="symbol">cx</span> 水平平移</span>
+                        <input type="number" id="boundCxmin" value="-10" step="0.5" title="cx 下界">
+                        <input type="number" id="boundCxmax" value="10" step="0.5" title="cx 上界">
+                    </div>
+                </div>
+                <div class="bounds-actions">
+                    <select class="preset-select" id="presetSelect">
+                        <option value="default">— 预设方案 —</option>
+                        <option value="wide">宽范围 (v:±50, d:0~80)</option>
+                        <option value="narrow">窄范围 (v:±10, d:2~25)</option>
+                        <option value="matlab">MATLAB 默认 (v:-6~6)</option>
+                        <option value="positive">正速率 (v:0~30)</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" id="applyPresetBtn">
+                        <i class="fas fa-check"></i> 应用
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="resetBoundsBtn">
+                        <i class="fas fa-redo"></i> 恢复默认
+                    </button>
+                </div>
+                <div class="bounds-hint">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>边界会约束求解器搜索范围。若最优解贴边，请放宽对应边界。</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-line"></i> 拟合结果</div>
+                <div id="paramResults">
+                    <div class="param-row">
+                        <span class="param-label">走滑速率 v</span>
+                        <span>
+                            <span class="param-value" id="resV">—</span>
+                            <span class="param-err" id="errV"></span>
+                            <span class="param-unit">mm/yr</span>
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">闭锁深度 d</span>
+                        <span>
+                            <span class="param-value" id="resD">—</span>
+                            <span class="param-err" id="errD"></span>
+                            <span class="param-unit">km</span>
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">平移 cy</span>
+                        <span>
+                            <span class="param-value" id="resCy">—</span>
+                            <span class="param-err" id="errCy"></span>
+                            <span class="param-unit"></span>
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">平移 cx</span>
+                        <span>
+                            <span class="param-value" id="resCx">—</span>
+                            <span class="param-err" id="errCx"></span>
+                            <span class="param-unit">km</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="fit-stats" id="fitStats" style="display:none;">
+                    <div class="param-row"><span class="param-label">RMSE</span><span class="param-value" id="resRmse">—</span></div>
+                    <div class="param-row"><span class="param-label">R²</span><span class="param-value" id="resR2">—</span></div>
+                    <div class="param-row"><span class="param-label">求解器</span><span class="param-value" id="resSolver" style="font-size:0.78rem;">—</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-info-circle"></i> 模型说明</div>
+                <div style="font-size:0.78rem; color:#7f8c8d; line-height:1.6;">
+                    <p>目标函数（已含符号修正）：</p>
+                    <p style="font-family: 'Courier New', monospace; background:#f8faff; padding:6px 10px; border-radius:6px; margin:6px 0; font-size:0.8rem; color:#2c3e50;">
+                        y = −[(v/π)·atan((dis + cx) / d) + cy]
+                    </p>
+                    <p>参数含义：</p>
+                    <ul style="padding-left:16px; margin-top:4px;">
+                        <li><strong>v</strong> — 走滑速率大小 (mm/yr)</li>
+                        <li><strong>d</strong> — 闭锁深度 (km)</li>
+                        <li><strong>cy</strong> — 垂直平移</li>
+                        <li><strong>cx</strong> — 水平平移 (km)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="plot-card">
+                <div class="plot-header">
+                    <span><i class="fas fa-chart-area"></i> 平行断层速率剖面</span>
+                    <span id="plotStatus">等待数据...</span>
+                </div>
+                <div id="plot">
+                    <div class="empty-plot">
+                        <i class="fas fa-chart-line"></i>
+                        <span>请加载数据文件后开始拟合</span>
+                    </div>
+                </div>
+            </div>
+            <div class="log-area" id="logArea">
+                <span class="log-info">[系统]</span> 就绪，等待加载数据文件...
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-code"></i> 基于 Nelder-Mead 单纯形法 · 纯前端实现
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="font-weight:600; color:#2c3e50;">正在计算...</div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            let rawData = null;
+            let parsedData = null;
+            let fitResult = null;
+
+            const fileInput = document.getElementById('fileInput');
+            const fitBtn = document.getElementById('fitBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const statTotal = document.getElementById('statTotal');
+            const statValid = document.getElementById('statValid');
+            const statInvalid = document.getElementById('statInvalid');
+            const statRange = document.getElementById('statRange');
+            const resV = document.getElementById('resV');
+            const resD = document.getElementById('resD');
+            const resCy = document.getElementById('resCy');
+            const resCx = document.getElementById('resCx');
+            const errV = document.getElementById('errV');
+            const errD = document.getElementById('errD');
+            const errCy = document.getElementById('errCy');
+            const errCx = document.getElementById('errCx');
+            const resRmse = document.getElementById('resRmse');
+            const resR2 = document.getElementById('resR2');
+            const resSolver = document.getElementById('resSolver');
+            const fitStats = document.getElementById('fitStats');
+            const plotDiv = document.getElementById('plot');
+            const plotStatus = document.getElementById('plotStatus');
+            const logArea = document.getElementById('logArea');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            const boundVmin = document.getElementById('boundVmin');
+            const boundVmax = document.getElementById('boundVmax');
+            const boundDmin = document.getElementById('boundDmin');
+            const boundDmax = document.getElementById('boundDmax');
+            const boundCymin = document.getElementById('boundCymin');
+            const boundCymax = document.getElementById('boundCymax');
+            const boundCxmin = document.getElementById('boundCxmin');
+            const boundCxmax = document.getElementById('boundCxmax');
+            const presetSelect = document.getElementById('presetSelect');
+            const applyPresetBtn = document.getElementById('applyPresetBtn');
+            const resetBoundsBtn = document.getElementById('resetBoundsBtn');
+
+            const DEFAULT_BOUNDS = {
+                v: [-20, 20],
+                d: [0.5, 40],
+                cy: [-30, 30],
+                cx: [-10, 10]
+            };
+
+            const PRESETS = {
+                wide:    { v: [-50, 50],  d: [0.5, 80],  cy: [-50, 50], cx: [-20, 20] },
+                narrow:  { v: [-10, 10],  d: [2, 25],    cy: [-20, 20], cx: [-5, 5] },
+                matlab:  { v: [-6, 6],    d: [0, 30],    cy: [-30, 30], cx: [-10, 20] },
+                positive:{ v: [0, 30],    d: [0.5, 40],  cy: [-30, 30], cx: [-10, 10] }
+            };
+
+            function log(msg, type) {
+                const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+                let cls = 'log-info';
+                if (type === 'error') cls = 'log-err';
+                else if (type === 'ok') cls = 'log-ok';
+                else if (type === 'time') cls = 'log-time';
+                const line = document.createElement('div');
+                line.innerHTML = `<span class="${cls}">[${time}]</span> ${msg}`;
+                logArea.appendChild(line);
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+
+            function parseDataFile(text) {
+                const lines = text.split(/\r?\n/);
+                const records = [];
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    let parts = line.split(/\s+/);
+                    if (parts.length < 9) {
+                        const parts2 = line.split(/[,\t]+/);
+                        if (parts2.length < 9) continue;
+                        parts = parts2;
+                    }
+                    const distance = parseFloat(parts[0]);
+                    const obs_parall = parseFloat(parts[1]);
+                    const obs_parall_err = parseFloat(parts[3]);
+                    const toggle = parseInt(parts[7]);
+                    const sn = parts[8] || '';
+                    if (isNaN(distance) || isNaN(obs_parall) || isNaN(obs_parall_err)) continue;
+                    records.push({
+                        distance, obs_parall,
+                        obs_perpend: parseFloat(parts[2]),
+                        obs_parall_err,
+                        obs_perpend_err: parseFloat(parts[4]),
+                        lon: parseFloat(parts[5]),
+                        lat: parseFloat(parts[6]),
+                        toggle: isNaN(toggle) ? 0 : toggle,
+                        sn
+                    });
+                }
+                return records;
+            }
+
+            function prepareFitData(records) {
+                const dis = [], obs_parall = [], sig_parall = [];
+                const dis_del = [], obs_parall_del = [], sig_parall_del = [];
+                records.forEach(r => {
+                    if (r.toggle === 1) {
+                        dis.push(r.distance);
+                        obs_parall.push(r.obs_parall);
+                        sig_parall.push(r.obs_parall_err);
+                    } else {
+                        dis_del.push(r.distance);
+                        obs_parall_del.push(r.obs_parall);
+                        sig_parall_del.push(r.obs_parall_err);
+                    }
+                });
+                return { dis, obs_parall, sig_parall, dis_del, obs_parall_del, sig_parall_del };
+            }
+
+            function updateStats(records, data) {
+                statTotal.textContent = records.length;
+                statValid.textContent = data.dis.length;
+                statInvalid.textContent = data.dis_del.length;
+                if (data.dis.length > 0) {
+                    const minD = Math.min(...data.dis);
+                    const maxD = Math.max(...data.dis);
+                    statRange.textContent = `${minD.toFixed(1)} ~ ${maxD.toFixed(1)} km`;
+                } else {
+                    statRange.textContent = '—';
+                }
+            }
+
+            function getBounds() {
+                return {
+                    v: [parseFloat(boundVmin.value), parseFloat(boundVmax.value)],
+                    d: [parseFloat(boundDmin.value), parseFloat(boundDmax.value)],
+                    cy: [parseFloat(boundCymin.value), parseFloat(boundCymax.value)],
+                    cx: [parseFloat(boundCxmin.value), parseFloat(boundCxmax.value)]
+                };
+            }
+
+            function validateBounds() {
+                const bounds = getBounds();
+                const inputs = [
+                    { el: boundVmin, val: bounds.v[0] }, { el: boundVmax, val: bounds.v[1] },
+                    { el: boundDmin, val: bounds.d[0] }, { el: boundDmax, val: bounds.d[1] },
+                    { el: boundCymin, val: bounds.cy[0] }, { el: boundCymax, val: bounds.cy[1] },
+                    { el: boundCxmin, val: bounds.cx[0] }, { el: boundCxmax, val: bounds.cx[1] }
+                ];
+                let allValid = true;
+                inputs.forEach(item => {
+                    if (isNaN(item.val)) { item.el.classList.add('invalid'); allValid = false; }
+                    else item.el.classList.remove('invalid');
+                });
+                if (!isNaN(bounds.v[0]) && !isNaN(bounds.v[1]) && bounds.v[0] >= bounds.v[1]) {
+                    boundVmin.classList.add('invalid'); boundVmax.classList.add('invalid'); allValid = false;
+                }
+                if (!isNaN(bounds.d[0]) && !isNaN(bounds.d[1]) && bounds.d[0] >= bounds.d[1]) {
+                    boundDmin.classList.add('invalid'); boundDmax.classList.add('invalid'); allValid = false;
+                }
+                if (!isNaN(bounds.d[0]) && bounds.d[0] <= 0) {
+                    boundDmin.classList.add('invalid'); allValid = false;
+                }
+                if (!isNaN(bounds.cy[0]) && !isNaN(bounds.cy[1]) && bounds.cy[0] >= bounds.cy[1]) {
+                    boundCymin.classList.add('invalid'); boundCymax.classList.add('invalid'); allValid = false;
+                }
+                if (!isNaN(bounds.cx[0]) && !isNaN(bounds.cx[1]) && bounds.cx[0] >= bounds.cx[1]) {
+                    boundCxmin.classList.add('invalid'); boundCxmax.classList.add('invalid'); allValid = false;
+                }
+                return allValid;
+            }
+
+            function setBounds(b) {
+                boundVmin.value = b.v[0]; boundVmax.value = b.v[1];
+                boundDmin.value = b.d[0]; boundDmax.value = b.d[1];
+                boundCymin.value = b.cy[0]; boundCymax.value = b.cy[1];
+                boundCxmin.value = b.cx[0]; boundCxmax.value = b.cx[1];
+                validateBounds();
+            }
+
+            applyPresetBtn.addEventListener('click', () => {
+                const key = presetSelect.value;
+                if (key === 'default') {
+                    setBounds(DEFAULT_BOUNDS);
+                    log('已恢复默认边界', 'info');
+                } else if (PRESETS[key]) {
+                    setBounds(PRESETS[key]);
+                    log(`已应用预设: ${presetSelect.options[presetSelect.selectedIndex].text}`, 'info');
+                }
+            });
+
+            resetBoundsBtn.addEventListener('click', () => {
+                setBounds(DEFAULT_BOUNDS);
+                presetSelect.value = 'default';
+                log('已恢复默认边界', 'info');
+            });
+
+            [boundVmin, boundVmax, boundDmin, boundDmax, boundCymin, boundCymax, boundCxmin, boundCxmax]
+                .forEach(el => el.addEventListener('input', validateBounds));
+
+            function modelFunc(v, d, cy, cx, dis) {
+                return -((v / Math.PI) * Math.atan((dis + cx) / d) + cy);
+            }
+
+            function solveNelderMead(dis, obs, weights, x0, lb, ub) {
+                const objective = function(params) {
+                    const v = params[0], d = params[1], cy = params[2], cx = params[3];
+                    let sum = 0;
+                    for (let i = 0; i < dis.length; i++) {
+                        const model = modelFunc(v, d, cy, cx, dis[i]);
+                        const r = weights[i] * (obs[i] - model);
+                        sum += r * r;
+                    }
+                    return sum;
+                };
+                const penalizedObjective = function(params) {
+                    let pen = 0;
+                    for (let i = 0; i < params.length; i++) {
+                        if (params[i] < lb[i]) pen += 1e6 * (lb[i] - params[i]) ** 2;
+                        if (params[i] > ub[i]) pen += 1e6 * (params[i] - ub[i]) ** 2;
+                    }
+                    return objective(params) + pen;
+                };
+                const result = fmin.nelderMead(penalizedObjective, x0, {
+                    maxIterations: 8000,
+                    tolerance: 1e-12,
+                    initialSimplex: x0.map(v => Math.abs(v) > 0.01 ? v * 0.1 : 0.1)
+                });
+                const params = result.x.map((v, i) => Math.min(Math.max(v, lb[i]), ub[i]));
+                return { params, cost: objective(params), iter: result.iterations || 0, solver: 'Nelder-Mead' };
+            }
+
+            function multiStartSolve(dis, obs, weights, bounds) {
+                const lb = [bounds.v[0], bounds.d[0], bounds.cy[0], bounds.cx[0]];
+                const ub = [bounds.v[1], bounds.d[1], bounds.cy[1], bounds.cx[1]];
+
+                const fixedGuesses = [
+                    [5, 12.2794, -1.0960, 0.6019],
+                    [3, 10, -2, 0],
+                    [8, 15, -1, 1],
+                    [2, 8, -3, -0.5],
+                    [6, 20, 0, 0],
+                    [4, 5, -1.5, 0.3]
+                ];
+                const initialGuesses = fixedGuesses.map(g =>
+                    g.map((v, i) => Math.min(Math.max(v, lb[i]), ub[i]))
+                );
+                const mid = lb.map((v, i) => (v + ub[i]) / 2);
+                initialGuesses.push(mid);
+                initialGuesses.push([
+                    (lb[0] + ub[0]) / 4,
+                    (lb[1] + ub[1]) / 2,
+                    (lb[2] + ub[2]) / 2,
+                    (lb[3] + ub[3]) / 2
+                ]);
+
+                let bestResult = null;
+                for (let i = 0; i < initialGuesses.length; i++) {
+                    const x0 = initialGuesses[i];
+                    log(`尝试初值 #${i+1}: v=${x0[0].toFixed(2)}, d=${x0[1].toFixed(2)}, cy=${x0[2].toFixed(2)}, cx=${x0[3].toFixed(2)}`, 'time');
+                    let result;
+                    try {
+                        result = solveNelderMead(dis, obs, weights, x0, lb, ub);
+                    } catch (e) {
+                        log(`初值 #${i+1} 求解失败: ${e.message}`, 'error');
+                        continue;
+                    }
+                    log(`初值 #${i+1} 结果: 代价=${result.cost.toFixed(6)}, v=${result.params[0].toFixed(4)}, d=${result.params[1].toFixed(4)}`, 'info');
+                    if (!bestResult || result.cost < bestResult.cost) bestResult = result;
+                }
+                if (!bestResult) throw new Error('所有初值均求解失败');
+                log(`最优解代价=${bestResult.cost.toFixed(6)}`, 'ok');
+                return bestResult;
+            }
+
+            function computeStdErrors(params, dis, obs, weights) {
+                const n = dis.length;
+                const p = params.length;
+                const eps = 1e-6;
+                const residual = (params) => {
+                    const v = params[0], d = params[1], cy = params[2], cx = params[3];
+                    const r = [];
+                    for (let i = 0; i < n; i++) {
+                        const model = modelFunc(v, d, cy, cx, dis[i]);
+                        r.push(weights[i] * (obs[i] - model));
+                    }
+                    return r;
+                };
+                const r0 = residual(params);
+                const J = [];
+                for (let i = 0; i < n; i++) J.push(new Array(p).fill(0));
+                for (let j = 0; j < p; j++) {
+                    const params_plus = params.slice();
+                    params_plus[j] += eps;
+                    const r1 = residual(params_plus);
+                    for (let i = 0; i < n; i++) J[i][j] = (r1[i] - r0[i]) / eps;
+                }
+                const JtJ = [];
+                for (let i = 0; i < p; i++) {
+                    JtJ.push(new Array(p).fill(0));
+                    for (let j = 0; j < p; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < n; k++) sum += J[k][i] * J[k][j];
+                        JtJ[i][j] = sum;
+                    }
+                }
+                const A = JtJ.map(row => [...row]);
+                const I = [];
+                for (let i = 0; i < p; i++) {
+                    I.push(new Array(p).fill(0));
+                    I[i][i] = 1;
+                }
+                for (let i = 0; i < p; i++) {
+                    let maxRow = i;
+                    for (let k = i + 1; k < p; k++) {
+                        if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+                    }
+                    [A[i], A[maxRow]] = [A[maxRow], A[i]];
+                    [I[i], I[maxRow]] = [I[maxRow], I[i]];
+                    const pivot = A[i][i];
+                    if (Math.abs(pivot) < 1e-15) continue;
+                    for (let j = 0; j < p; j++) {
+                        A[i][j] /= pivot;
+                        I[i][j] /= pivot;
+                    }
+                    for (let k = 0; k < p; k++) {
+                        if (k === i) continue;
+                        const factor = A[k][i];
+                        for (let j = 0; j < p; j++) {
+                            A[k][j] -= factor * A[i][j];
+                            I[k][j] -= factor * I[i][j];
+                        }
+                    }
+                }
+                const rss = r0.reduce((s, v) => s + v * v, 0);
+                const dof = Math.max(n - p, 1);
+                const sigma2 = rss / dof;
+                const stdErrs = [];
+                for (let i = 0; i < p; i++) stdErrs.push(Math.sqrt(Math.abs(I[i][i]) * sigma2));
+                return stdErrs;
+            }
+
+            function computeR2(dis, obs, params) {
+                const v = params[0], d = params[1], cy = params[2], cx = params[3];
+                const meanObs = obs.reduce((s, v) => s + v, 0) / obs.length;
+                let ssRes = 0, ssTot = 0;
+                for (let i = 0; i < dis.length; i++) {
+                    const model = modelFunc(v, d, cy, cx, dis[i]);
+                    ssRes += (obs[i] - model) ** 2;
+                    ssTot += (obs[i] - meanObs) ** 2;
+                }
+                return ssTot > 0 ? 1 - ssRes / ssTot : 0;
+            }
+
+            function plotResults(data, fit) {
+                if (!data || !fit) return;
+                const { dis, obs_parall, sig_parall, dis_del, obs_parall_del, sig_parall_del } = data;
+                const { params, stdErrs } = fit;
+                const v = params[0], d = params[1], cy = params[2], cx = params[3];
+
+                const xMin = Math.min(...dis, ...dis_del) - 5;
+                const xMax = Math.max(...dis, ...dis_del) + 5;
+                const xStep = (xMax - xMin) / 500;
+                const xModel = [], yModel = [];
+                for (let x = xMin; x <= xMax; x += xStep) {
+                    xModel.push(x);
+                    yModel.push(modelFunc(v, d, cy, cx, x));
+                }
+
+                const validTrace = {
+                    x: dis, y: obs_parall,
+                    error_y: { type: 'data', array: sig_parall, visible: true, color: 'black', thickness: 1.5, width: 6 },
+                    mode: 'markers', type: 'scatter', name: '有效数据',
+                    marker: { symbol: 'square', size: 10, color: 'red', line: { color: 'black', width: 1.5 } }
+                };
+                const invalidTrace = {
+                    x: dis_del, y: obs_parall_del,
+                    error_y: { type: 'data', array: sig_parall_del, visible: true, color: 'black', thickness: 1.5, width: 6 },
+                    mode: 'markers', type: 'scatter', name: '无效数据 (toggle=0)',
+                    marker: { symbol: 'square', size: 10, color: 'white', line: { color: 'black', width: 1.5 } }
+                };
+                const modelTrace = {
+                    x: xModel, y: yModel, mode: 'lines', type: 'scatter', name: '模型拟合',
+                    line: { color: '#2980b9', width: 3.5, shape: 'spline' }
+                };
+                const vlineTrace = {
+                    x: [-cx, -cx],
+                    y: [Math.min(...yModel, ...obs_parall) - 2, Math.max(...yModel, ...obs_parall) + 2],
+                    mode: 'lines', type: 'scatter', name: 'x = -cx',
+                    line: { color: '#95a5a6', width: 4, dash: 'solid' }, opacity: 0.5, showlegend: false
+                };
+
+                const layout = {
+                    title: { text: '平行断层速率剖面', font: { size: 18, color: '#2c3e50' }, x: 0.5, y: 0.95 },
+                    xaxis: {
+                        title: { text: '距离断层位置 (km)', font: { size: 16, color: '#2c3e50' } },
+                        tickfont: { size: 13 }, gridcolor: '#e8ecf1', zeroline: false, tickdirection: 'out'
+                    },
+                    yaxis: {
+                        title: { text: '平行断层速率 (mm/a)', font: { size: 16, color: '#2c3e50' } },
+                        tickfont: { size: 13 }, gridcolor: '#e8ecf1', zeroline: false, tickdirection: 'out'
+                    },
+                    plot_bgcolor: '#ffffff', paper_bgcolor: '#f8f9fc', hovermode: 'closest',
+                    legend: {
+                        x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.85)',
+                        bordercolor: '#d0dbe8', borderwidth: 1, font: { size: 12 }
+                    },
+                    margin: { l: 70, r: 30, t: 60, b: 60 },
+                    annotations: [
+                        {
+                            x: 0.05, y: 0.35, xref: 'paper', yref: 'paper',
+                            text: `走滑速率: ${Math.abs(v).toFixed(2)} ± ${stdErrs[0].toFixed(2)} mm/yr`,
+                            showarrow: false,
+                            font: { size: 14, color: '#2c3e50', weight: 'bold' }
+                        },
+                        {
+                            x: 0.05, y: 0.27, xref: 'paper', yref: 'paper',
+                            text: `闭锁深度: ${Math.abs(d).toFixed(2)} ± ${stdErrs[1].toFixed(2)} km`,
+                            showarrow: false,
+                            font: { size: 14, color: '#2c3e50', weight: 'bold' }
+                        },
+                        {
+                            x: 0.05, y: 0.19, xref: 'paper', yref: 'paper',
+                            text: `平移: ${Math.abs(cx).toFixed(2)} ± ${stdErrs[3].toFixed(2)} km`,
+                            showarrow: false,
+                            font: { size: 14, color: '#2c3e50', weight: 'bold' }
+                        }
+                    ]
+                };
+
+                const config = {
+                    responsive: true, displayModeBar: true,
+                    modeBarButtonsToRemove: ['lasso2d', 'select2d'], displaylogo: false,
+                    toImageButtonOptions: { format: 'png', filename: 'TSH_parall_prof_single', height: 600, width: 1200, scale: 2 }
+                };
+
+                Plotly.newPlot(plotDiv, [vlineTrace, modelTrace, validTrace, invalidTrace], layout, config);
+                plotStatus.textContent = `✅ 拟合完成 · ${fit.solver} · ${fit.iter} 次迭代`;
+            }
+
+            function runFit() {
+                if (!parsedData) { alert('请先加载数据文件'); return; }
+                const { dis, obs_parall, sig_parall } = parsedData;
+                if (dis.length < 4) { alert('有效数据点不足 (至少需要4个点)'); return; }
+                if (!validateBounds()) {
+                    alert('参数边界设置无效，请检查：\n- 所有字段必须为数字\n- 下界必须小于上界\n- 闭锁深度 d 必须大于 0');
+                    return;
+                }
+                const bounds = getBounds();
+                loadingOverlay.classList.add('active');
+                log(`开始走滑速率拟合，求解器: Nelder-Mead`, 'info');
+                log(`参数边界: v[${bounds.v[0]}, ${bounds.v[1]}], d[${bounds.d[0]}, ${bounds.d[1]}], cy[${bounds.cy[0]}, ${bounds.cy[1]}], cx[${bounds.cx[0]}, ${bounds.cx[1]}]`, 'info');
+
+                setTimeout(() => {
+                    try {
+                        const weights = sig_parall.map(s => 1 / Math.max(s * s, 1e-12));
+                        const result = multiStartSolve(dis, obs_parall, weights, bounds);
+                        const stdErrs = computeStdErrors(result.params, dis, obs_parall, weights);
+                        const r2 = computeR2(dis, obs_parall, result.params);
+                        const rmse = Math.sqrt(result.cost / dis.length);
+
+                        fitResult = {
+                            params: result.params, stdErrs, rmse, r2,
+                            iter: result.iter, cost: result.cost, solver: result.solver
+                        };
+
+                        const v = result.params[0], d = result.params[1];
+                        const cy = result.params[2], cx = result.params[3];
+
+                        resV.textContent = Math.abs(v).toFixed(4);
+                        errV.textContent = ` ± ${stdErrs[0].toFixed(4)}`;
+                        resD.textContent = Math.abs(d).toFixed(4);
+                        errD.textContent = ` ± ${stdErrs[1].toFixed(4)}`;
+                        resCy.textContent = cy.toFixed(4);
+                        errCy.textContent = ` ± ${stdErrs[2].toFixed(4)}`;
+                        resCx.textContent = Math.abs(cx).toFixed(4);
+                        errCx.textContent = ` ± ${stdErrs[3].toFixed(4)}`;
+                        resRmse.textContent = rmse.toFixed(6);
+                        resR2.textContent = r2.toFixed(6);
+                        resSolver.textContent = result.solver;
+                        fitStats.style.display = 'block';
+
+                        plotResults(parsedData, fitResult);
+
+                        const eps = 1e-3;
+                        const atBound = [];
+                        if (Math.abs(v - bounds.v[0]) < eps || Math.abs(v - bounds.v[1]) < eps) atBound.push('v');
+                        if (Math.abs(d - bounds.d[0]) < eps || Math.abs(d - bounds.d[1]) < eps) atBound.push('d');
+                        if (Math.abs(cy - bounds.cy[0]) < eps || Math.abs(cy - bounds.cy[1]) < eps) atBound.push('cy');
+                        if (Math.abs(cx - bounds.cx[0]) < eps || Math.abs(cx - bounds.cx[1]) < eps) atBound.push('cx');
+                        if (atBound.length > 0) {
+                            log(`⚠️ 参数 ${atBound.join(', ')} 贴边，建议放宽对应边界`, 'error');
+                        }
+
+                        log(`拟合完成: v=${Math.abs(v).toFixed(4)} ± ${stdErrs[0].toFixed(4)}, d=${Math.abs(d).toFixed(4)} ± ${stdErrs[1].toFixed(4)}`, 'ok');
+                        log(`RMSE = ${rmse.toFixed(6)}, R² = ${r2.toFixed(6)}, 迭代次数 = ${result.iter}, 求解器 = ${result.solver}`, 'ok');
+                    } catch (err) {
+                        log(`拟合错误: ${err.message}`, 'error');
+                        console.error(err);
+                        alert('拟合过程中出现错误: ' + err.message);
+                    } finally {
+                        loadingOverlay.classList.remove('active');
+                    }
+                }, 50);
+            }
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const text = ev.target.result;
+                    const records = parseDataFile(text);
+                    if (records.length === 0) {
+                        alert('未能解析出有效数据，请检查文件格式。\n每行应包含至少9个字段，用空格或逗号分隔。');
+                        return;
+                    }
+                    rawData = records;
+                    parsedData = prepareFitData(records);
+                    updateStats(records, parsedData);
+                    fitBtn.disabled = false;
+                    log(`已加载文件: ${file.name}`, 'ok');
+                    log(`共 ${records.length} 条记录，有效 ${parsedData.dis.length} 条，无效 ${parsedData.dis_del.length} 条`, 'info');
+
+                    const traceAll = {
+                        x: records.map(r => r.distance),
+                        y: records.map(r => r.obs_parall),
+                        mode: 'markers', type: 'scatter', name: '全部数据',
+                        marker: { color: '#bdc3c7', size: 6 }
+                    };
+                    const layout = {
+                        title: { text: '原始数据预览', font: { size: 16, color: '#2c3e50' } },
+                        xaxis: { title: '距离 (km)', gridcolor: '#e8ecf1' },
+                        yaxis: { title: '平行速率 (mm/a)', gridcolor: '#e8ecf1' },
+                        plot_bgcolor: '#ffffff', paper_bgcolor: '#f8f9fc',
+                        margin: { l: 60, r: 30, t: 50, b: 50 }
+                    };
+                    Plotly.newPlot(plotDiv, [traceAll], layout, { responsive: true, displaylogo: false });
+                    plotStatus.textContent = '数据已加载，点击“开始拟合”';
+                };
+                reader.onerror = () => alert('文件读取失败');
+                reader.readAsText(file, 'UTF-8');
+                fileInput.value = '';
+            });
+
+            fitBtn.addEventListener('click', runFit);
+
+            resetBtn.addEventListener('click', () => {
+                rawData = null; parsedData = null; fitResult = null;
+                statTotal.textContent = '0';
+                statValid.textContent = '0';
+                statInvalid.textContent = '0';
+                statRange.textContent = '—';
+                resV.textContent = '—'; errV.textContent = '';
+                resD.textContent = '—'; errD.textContent = '';
+                resCy.textContent = '—'; errCy.textContent = '';
+                resCx.textContent = '—'; errCx.textContent = '';
+                resRmse.textContent = '—';
+                resR2.textContent = '—';
+                resSolver.textContent = '—';
+                fitStats.style.display = 'none';
+                fitBtn.disabled = true;
+                plotDiv.innerHTML = `<div class="empty-plot"><i class="fas fa-chart-line"></i><span>请加载数据文件后开始拟合</span></div>`;
+                plotStatus.textContent = '等待数据...';
+                logArea.innerHTML = `<span class="log-info">[系统]</span> 已重置，等待加载数据文件...`;
+                log('已重置所有状态', 'info');
+            });
+
+            document.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+            document.addEventListener('drop', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    const validExts = ['.txt', '.dat', '.csv'];
+                    const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                    if (!validExts.includes(ext)) { alert('请拖拽 .txt / .dat / .csv 文件'); return; }
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+            window.addEventListener('dragover', (e) => e.preventDefault());
+            window.addEventListener('drop', (e) => e.preventDefault());
+
+            validateBounds();
+            log('系统就绪，请加载数据文件 (tsh.area_t_h.txt)', 'info');
+            log('使用 Nelder-Mead 单纯形法求解（多初值策略）', 'info');
+            log('可在左侧“求解范围设置”中自定义各参数边界', 'info');
+        })();
+    </script>
+</body>
+</html>

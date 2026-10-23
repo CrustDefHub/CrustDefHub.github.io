@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>断层形变反演工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #e8ecf1;
+            color: #2c3e50;
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        }
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header h1 span { color: #3498db; }
+        .header .subtitle {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: #a0b4c8;
+            letter-spacing: 0.5px;
+        }
+        .main {
+            flex: 1;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 36px 20px 48px;
+            width: 100%;
+        }
+        .intro {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+        }
+        .intro p { font-size: 0.95rem; color: #34495e; }
+        .intro p + p { margin-top: 12px; }
+        .card-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 26px 30px;
+            transition: box-shadow 0.2s, transform 0.2s;
+            border-left: 5px solid #3498db;
+        }
+        .card:hover {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+            transform: translateY(-2px);
+        }
+        .card.strike { border-left-color: #e67e22; }
+        .card.dip { border-left-color: #9b59b6; }
+        .card.external { border-left-color: #27ae60; }
+        .card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2 i { font-size: 1.1rem; }
+        .card.strike h2 i { color: #e67e22; }
+        .card.dip h2 i { color: #9b59b6; }
+        .card.external h2 i { color: #27ae60; }
+        .card .desc {
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            margin-bottom: 14px;
+        }
+        .card .principle {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 0.85rem;
+            color: #34495e;
+            margin-bottom: 16px;
+            line-height: 1.65;
+        }
+        .card .principle strong { color: #2c3e50; }
+        .card .principle code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+        }
+        .card .btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 22px;
+            border-radius: 24px;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: white;
+            transition: background 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .card.strike .btn-link { background: #e67e22; }
+        .card.strike .btn-link:hover { background: #d35400; }
+        .card.dip .btn-link { background: #9b59b6; }
+        .card.dip .btn-link:hover { background: #8e44ad; }
+        .card.external .btn-link { background: #27ae60; }
+        .card.external .btn-link:hover { background: #219a52; }
+        .footer {
+            text-align: center;
+            padding: 18px;
+            font-size: 0.8rem;
+            color: #95a5a6;
+            background: white;
+            border-top: 1px solid #e1e8f0;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.4rem; }
+            .main { padding: 24px 14px 36px; }
+            .card { padding: 20px 18px; }
+            .intro { padding: 20px 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span>⛰️</span> 断层形变反演工作台</h1>
+        <div class="subtitle">Fault Deformation Inversion Workbench · 走滑与倾滑速率联合反演</div>
+    </div>
+
+    <div class="main">
+        <div class="intro">
+            <p>本工作台基于弹性半空间位错模型，利用跨断层 GPS 速度剖面反演断层的运动学参数。通过非线性最小二乘拟合，可从平行与垂直断层方向的速度观测中分别提取走滑速率、倾滑速率、闭锁深度及断层倾角等关键信息。</p>
+            <p>下方提供两个独立的反演工具，以及一个相关的形变数据平台入口。</p>
+        </div>
+
+        <div class="card-grid">
+            <!-- 走滑 -->
+            <div class="card strike">
+                <h2><i class="fas fa-arrows-left-right"></i> 走滑速率反演</h2>
+                <div class="desc">平行于断层方向的速度剖面 · 螺旋位错模型</div>
+                <div class="principle">
+                    <strong>原理：</strong>采用 <strong>螺旋位错（screw dislocation）</strong> 模型描述走滑断层在弹性半空间中的形变场。断层两侧的平行速度分量满足反正切函数关系：
+                    <br>
+                    <code>v<sub>∥</sub>(x) = (s/π)·arctan((x + c) / d) + v₀</code>
+                    <br>
+                    其中 <strong>s</strong> 为走滑速率，<strong>d</strong> 为闭锁深度，<strong>c</strong> 为水平平移，<strong>v₀</strong> 为垂直偏移。通过加权最小二乘拟合观测剖面，即可反演断层走滑运动学参数。
+                </div>
+                <a class="btn-link" href="OPT_strike_slip.html">
+                    <i class="fas fa-arrow-right"></i> 进入走滑反演
+                </a>
+            </div>
+
+            <!-- 倾滑 -->
+            <div class="card dip">
+                <h2><i class="fas fa-arrows-up-down"></i> 倾滑速率反演</h2>
+                <div class="desc">垂直于断层方向的速度剖面 · 刃型位错模型</div>
+                <div class="principle">
+                    <strong>原理：</strong>采用 <strong>刃型位错（edge dislocation）</strong> 模型描述倾滑断层在弹性半空间中的形变场。垂直速度分量同时受断层倾角 θ 与闭锁深度 d 控制：
+                    <br>
+                    <code>v<sub>⊥</sub>(x) = (s/π)·[cosθ·atan(u) + (sinθ − cosθ·u)/(1+u²)] + c₁</code>
+                    <br>
+                    其中 <code>u = (x + c₂ − d/tanθ) / d</code>，<strong>s</strong> 为倾滑速率，<strong>θ</strong> 为断层倾角。该模型能同时约束倾滑速率与断层几何形态。
+                </div>
+                <a class="btn-link" href="OPT_dip_slip.html">
+                    <i class="fas fa-arrow-right"></i> 进入倾滑反演
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-code"></i> 纯前端实现 · 基于 Nelder-Mead 非线性优化 · 弹性半空间位错模型
+    </div>
+
+    <!-- 引入 Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</body>
+</html>

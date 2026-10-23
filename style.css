@@ -21,10 +21,35 @@ select, input[type="number"] { min-height:30px; border:1px solid #cbd9e5; border
 #parallelPlot, #verticalPlot { width:100%; height:270px; }.beachball-popup { min-width:200px; line-height:1.6; }
 #plot-container-content { display:none; }
 .leaflet-control-zoom a { color:var(--ink) !important; }.leaflet-popup-content-wrapper { border-radius:10px; }.leaflet-popup-content { margin:12px 15px; }
+
+/* ===== 新增：断层形变反演工具入口面板 ===== */
+.analysis-panel {
+  bottom: 220px;              /* 位于“剖面与导出”面板（约162px高）上方 */
+  left: 16px;
+  width: 265px;
+}
+.analysis-panel p {
+  margin: 0 0 10px;
+  color: #536a80;
+  font-size: 12px;
+}
+.fault-inversion-link {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .2s;
+}
+.fault-inversion-link:hover { background: var(--accent-dark); }
+
 @media (max-width:850px) {
   .app-brand { left:54px; top:12px; }
   .contact-panel { display:none; }
   .layer-panel { top:10px; right:10px; width:290px; max-height:calc(100vh - 20px); }
   /* 手机端只保留图层展示，隐藏剖面/导出等计算工具面板及绘图控件 */
-  .tool-panel, .plot-container, .leaflet-draw.leaflet-control { display:none !important; }
+  .tool-panel, .plot-container, .analysis-panel, .leaflet-draw.leaflet-control { display:none !important; }
 }

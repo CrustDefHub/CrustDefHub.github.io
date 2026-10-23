@@ -79,6 +79,18 @@
     <div id="contact-info-content" class="panel-content"><p>中国地震局第二监测中心<br>大地测量数据团队<br><a href="mailto:shangw.song@hotmail.com">shangw.song@hotmail.com</a></p></div>
   </section>
 
+  <!-- 👇 新增：断层形变反演工具入口（左下角，位于“剖面与导出”上方） 👇 -->
+  <section id="analysis-links" class="map-panel analysis-panel">
+    <div class="panel-heading">
+      <div><span class="eyebrow">TOOLS</span><h2>断层形变反演</h2></div>
+    </div>
+    <div class="panel-content">
+      <p>基于跨断层 GPS 速度剖面，利用弹性半空间位错模型反演断层走滑/倾滑速率、闭锁深度与倾角。</p>
+      <a href="fault_inversion_index.html" class="fault-inversion-link">⛰️ 进入断层形变反演工作台 →</a>
+    </div>
+  </section>
+  <!-- 👆 新增结束 👆 -->
+
   <section class="plot-container map-panel" id="plot-container">
     <div class="panel-heading"><div><span class="eyebrow">RESULTS</span><h2>剖面结果</h2></div><button class="panel-toggle" type="button" onclick="togglePanel('plot-container-content')">⌃</button></div>
     <div id="plot-container-content" class="panel-content" style="display:none"><div id="parallelPlot"></div><div id="verticalPlot"></div></div>
